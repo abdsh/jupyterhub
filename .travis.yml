@@ -20,6 +20,7 @@ install:
 
 # running tests
 script:
+  - env
   - pytest -v --maxfail=2 --cov=jupyterhub jupyterhub/tests
 after_success:
   - codecov

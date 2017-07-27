@@ -56,10 +56,7 @@ def test_external_proxy(request):
 
     def _cleanup_proxy():
         if proxy.poll() is None:
-            print("Terminating proxy")
             proxy.terminate()
-        else:
-            print("Not stopping proxy", proxy)
     request.addfinalizer(_cleanup_proxy)
 
     def wait_for_proxy():
