@@ -28,6 +28,9 @@ def test_external_proxy(request):
     cfg.ConfigurableHTTPProxy.should_start = False
 
     app = MockHub.instance(config=cfg)
+    # disable last_activity polling to avoid check_routes being called during the test,
+    # which races with some of our test conditions
+    app.last_activity_interval = 0
 
     def fin():
         MockHub.clear_instance()
