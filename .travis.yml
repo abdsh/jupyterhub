@@ -23,7 +23,10 @@ before_install:
   - |
     if [[ $JUPYTERHUB_TEST_DB_URL == mysql* ]]; then
       mysql -e 'CREATE DATABASE jupyterhub CHARACTER SET utf8 COLLATE utf8_general_ci;'
-      mysql -e 'CREATE DATABASE jupyterhub_upgrade CHARACTER SET utf8 COLLATE utf8_general_ci;'
+      # avoid too-long-key errors on jupyterhub 0.7 + mysql < 5.7.7
+      mysql -e 'SET GLOBAL innodb_default_row_format=DYNAMIC;'
+      mysql -e 'SET GLOBAL innodb_large_prefix=ON;'
+      mysql -e 'CREATE DATABASE jupyterhub_upgrade CHARACTER SET ascii COLLATE ascii_bin;'
       pip install 'mysql-connector<2.2'
       ./old-hub-env/bin/python -m pip install 'mysql-connector<2.2'
     elif [[ $JUPYTERHUB_TEST_DB_URL == postgresql* ]]; then
