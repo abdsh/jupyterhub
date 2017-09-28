@@ -15,7 +15,7 @@ docker rm -f "$NAME" 2>/dev/null || true
 case "$DB" in
 "mysql")
   RUN_ARGS="-e MYSQL_ALLOW_EMPTY_PASSWORD=1 -p $MYSQL_TCP_PORT:3306 mysql:5.7"
-  CHECK="mysql --user root -e \q"
+  CHECK="mysql --host $MYSQL_HOST --port $MYSQL_TCP_PORT --user root -e \q"
   ;;
 "postgres")
   RUN_ARGS="-p 5432:5432 postgres:9.5"
