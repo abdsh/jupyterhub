@@ -38,7 +38,10 @@ workflows:
   version: 2
   build-and-publish:
     jobs:
-      - test
+      - test:
+          filters:
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - test
@@ -49,5 +52,7 @@ workflows:
           requires:
             - test
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /.*/
