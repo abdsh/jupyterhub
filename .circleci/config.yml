@@ -30,7 +30,6 @@ jobs:
       tags:
         only: /.*/
     steps:
-      - checkout
       - run:
           name: Push tagged branch to corresponding image
           command: |
@@ -39,11 +38,12 @@ jobs:
 
 workflows:
   version: 2
-  jobs:
-    - test
-    - deploy:
-      requires:
-        - test
-    - release:
-      requires:
-        - test
+  build_and_deploy:
+    jobs:
+      - test
+      - deploy:
+        requires:
+          - test
+      - release:
+        requires:
+          - test
