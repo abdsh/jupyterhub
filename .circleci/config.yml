@@ -3,9 +3,9 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2
-machine: true
 jobs:
   test:
+    machine: true
     steps:
       - checkout
       - run:
@@ -15,6 +15,7 @@ jobs:
             docker build -t jupyterhub/jupyterhub-onbuild:${CIRCLE_TAG:-latest} onbuild
 
   deploy:
+    machine: true
     filters:
       branches:
         only: master
@@ -26,6 +27,7 @@ jobs:
             docker push jupyterhub/jupyterhub-onbuild
 
   release:
+    machine: true
     filters:
       tags:
         only: /.*/
