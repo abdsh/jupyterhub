@@ -7,71 +7,46 @@ jobs:
     steps:
       - checkout
       - run:
-          command: ls
-
-  test:
-    machine:
-      enabled: true
-    steps:
-      - checkout
-      - run:
           command: docker build -t jupyterhub/jupyterhub .
       - run:
           command: docker build -t jupyterhub/jupyterhub-onbuild:${CIRCLE_TAG:-latest} onbuild
+      - run:
+          command: |
+            mkdir -p docker-cache
+            docker save -o docker-cache/onbuild.tar jupyterhub/jupyterhub-onbuild:${CIRCLE_TAG:-latest}
+      - run:
+          command: |
+            docker run --rm -it jupyterhub/jupyterhub-onbuild:${CIRCLE_TAG:-latest} jupyterhub --help
+      - save_cache:
+          key: docker-{{ .BuildNum }}
+          paths:
+            - docker-cache
 
   deploy:
     machine:
       enabled: true
     steps:
+      - restore_cache:
+          keys:
+            - docker-{{ .BuildNum }}
+      - run:
+          command: docker load < docker-cache/onbuild.tar
       - run:
           command: docker login -u $DOCKER_USER -p $DOCKER_PASS -e unused@example.com
       - run:
-          command: docker push jupyterhub/jupyterhub-onbuild
-
-  release:
-    machine:
-      enabled: true
-    steps:
-      - run:
-          command: docker login -u $DOCKER_USER -p $DOCKER_PASS -e unused@example.com
-      - run:
-          command: docker push jupyterhub/jupyterhub-onbuild:$CIRCLE_TAG
+          command: docker push jupyterhub/jupyterhub-onbuild:${CIRCLE_TAG:-latest}
 
 
 workflows:
   version: 2
   build-test-deploy:
     jobs:
-      - build:
-          filters:
-            branches:
-              only: master
-      - test:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
+      - build
       - deploy:
           requires:
-            - test
+            - build
           filters:
             branches:
               only: master
-  build-test-release:
-      - build:
-          filters:
-            tags:
-              only: /.*/
-      - test:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
-      - release:
-          requires:
-            - test
-          filters:
             tags:
               only: /.*/
